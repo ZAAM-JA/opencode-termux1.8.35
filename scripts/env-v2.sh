@@ -3,7 +3,7 @@ set -euo pipefail
 
 export REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 export WORK_DIR="${WORK_DIR:-${REPO_ROOT}/build-v2}"
-export OPENCODE_VERSION="${OPENCODE_VERSION:-1.0.0}"
+export OPENCODE_VERSION="${OPENCODE_VERSION:-1.0.1}"
 export OPENCODE_CHANNEL="${OPENCODE_CHANNEL:-android-termux}"
 export BUN_VERSION="${BUN_VERSION:-1.4.2}"
 export OPENTUI_VERSION="${OPENTUI_VERSION:-0.5.10}"

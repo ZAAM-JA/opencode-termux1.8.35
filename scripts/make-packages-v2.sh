@@ -11,7 +11,11 @@
 # Layouts (the wrapper supports both):
 #   zip:      opencode2, opencode2.bin, libopentui.so in one directory
 #   packages: $PREFIX/bin/opencode2, $PREFIX/libexec/opencode2/opencode2.bin,
-#             $PREFIX/lib/libopentui.so
+#             $PREFIX/libexec/opencode2/libopentui.so
+#
+# All v2 files live under bin/ and libexec/opencode2/ so the package never
+# shares a path with the v1 "opencode" package (which owns lib/libopentui.so).
+# The two can therefore be installed side by side.
 
 set -euo pipefail
 
@@ -37,7 +41,7 @@ cat > "$DIST_DIR/flat/opencode2" <<'WEOF'
 #
 # Path resolution order (supports both layouts):
 #   flat zip:    opencode2, opencode2.bin, libopentui.so in the same directory
-#   installed:   bin/opencode2, libexec/opencode2/opencode2.bin, lib/libopentui.so
+#   installed:   bin/opencode2 and libexec/opencode2/{opencode2.bin,libopentui.so}
 set -eu
 
 SELF="$(readlink -f "$0" 2>/dev/null || echo "$0")"
@@ -46,11 +50,11 @@ DIR="$(CDPATH= cd -- "$(dirname "$SELF")" && pwd)"
 # Termux markers, in case we are launched outside a Termux shell
 export PREFIX="${PREFIX:-/data/data/com.termux/files/usr}"
 
-# Locate the native library directory. Prefer the installed package layout
-# (libs under ../lib) over the flat zip layout (libs next to the wrapper),
-# so upgrades never pick up a stale flat-layout library.
+# Locate the native library directory. Prefer the private installed package
+# layout (libexec/opencode2) over the flat zip layout (libs next to the
+# wrapper), so upgrades never pick up a stale flat-layout library.
 NATIVE_LIB_DIR=""
-for candidate in "$DIR/../lib" "$PREFIX/lib" "$DIR"; do
+for candidate in "$DIR/../libexec/opencode2" "$PREFIX/libexec/opencode2" "$DIR"; do
     if [ -f "$candidate/libopentui.so" ]; then
         NATIVE_LIB_DIR="$candidate"
         break
@@ -101,10 +105,9 @@ echo ">>> Creating pacman package..."
 STAGE="$OUT/pacman-stage"
 mkdir -p "$STAGE/data/data/com.termux/files/usr/bin"
 mkdir -p "$STAGE/data/data/com.termux/files/usr/libexec/opencode2"
-mkdir -p "$STAGE/data/data/com.termux/files/usr/lib"
 cp "$DIST_DIR/flat/opencode2" "$STAGE/data/data/com.termux/files/usr/bin/opencode2"
 cp "$BIN" "$STAGE/data/data/com.termux/files/usr/libexec/opencode2/opencode2.bin"
-cp "$LIB" "$STAGE/data/data/com.termux/files/usr/lib/libopentui.so"
+cp "$LIB" "$STAGE/data/data/com.termux/files/usr/libexec/opencode2/libopentui.so"
 chmod 755 "$STAGE/data/data/com.termux/files/usr/bin/opencode2"
 chmod 755 "$STAGE/data/data/com.termux/files/usr/libexec/opencode2/opencode2.bin"
 cat > "$STAGE/.PKGINFO" <<PEOF

@@ -5,97 +5,26 @@ Build system for cross-compiling [OpenCode](https://github.com/anomalyco/opencod
 OpenCode is an AI-powered coding assistant for the terminal. It uses [Bun](https://bun.sh/) as its JavaScript runtime and compiles to a standalone binary via `bun build --compile`. Since Bun has no official Android support ([marked "not planned"](https://github.com/oven-sh/bun/issues/9)), this project cross-compiles Bun itself from source for Android/aarch64, including the full WebKit/JavaScriptCore engine.
 
 
----
+## Versions
 
-# OpenCode 2 (opencode2) -- v2 pipeline
+Two engines are available. They install **side by side** -- `opencode` and `opencode2` are
+separate packages and commands, and v2 never overwrites v1 files.
 
-OpenCode **v2** is a new engine (new CLI, new OpenTUI-based TUI, new server). It is packaged
-as the **`opencode2`** command and package, so it installs **alongside** the v1 `opencode`
-package without touching it -- you can run and compare both, and migrate when ready.
+| | Command | Status | Runtime |
+|---|---|---|---|
+| OpenCode 1.x | `opencode` | stable | patched Bun 1.2.13 + WebKit/JSC, built from source |
+| OpenCode 2.x | `opencode2` | pre-release | official Bun 1.4.2 android target + OpenTUI 0.5.10 |
 
-Unlike v1, the v2 pipeline needs **no custom Bun/WebKit cross-compile**: it uses the official
-Bun `linux-aarch64-android` (bionic) compile target (Bun v1.4.2), plus OpenTUI 0.5.10
-cross-compiled for Android/bionic with Zig + the NDK.
-
-## Install v2 (Termux)
-
-### Option 1: Pacman package (recommended)
+Install the v2 pre-release alongside v1:
 
 ```bash
-curl -LO https://github.com/guysoft/opencode-termux/releases/download/v1.0.0/opencode2-1.0.0-1-aarch64.pkg.tar.xz
-pacman -U opencode2-1.0.0-1-aarch64.pkg.tar.xz
+curl -LO https://github.com/guysoft/opencode-termux/releases/download/v1.0.1/opencode2-1.0.1-1-aarch64.pkg.tar.xz
+pacman -U opencode2-1.0.1-1-aarch64.pkg.tar.xz
 opencode2
 ```
 
-### Option 2: Deb package
-
-```bash
-curl -LO https://github.com/guysoft/opencode-termux/releases/download/v1.0.0/opencode2_1.0.0_aarch64.deb
-dpkg -i opencode2_1.0.0_aarch64.deb
-opencode2
-```
-
-### Option 3: Standalone binary (zip)
-
-```bash
-# Download opencode2-1.0.0-android-aarch64.zip from the releases page, then:
-mkdir -p $PREFIX/libexec/opencode2 $PREFIX/lib
-unzip opencode2-1.0.0-android-aarch64.zip
-mv opencode2 $PREFIX/bin/opencode2
-chmod +x $PREFIX/bin/opencode2
-mv opencode2.bin $PREFIX/libexec/opencode2/opencode2.bin
-chmod +x $PREFIX/libexec/opencode2/opencode2.bin
-mv libopentui.so $PREFIX/lib/
-pkg install ripgrep
-opencode2
-```
-
-The pacman and deb packages automatically install `ripgrep` as a dependency.
-
-### Verify
-
-```bash
-opencode2 --version   # opencode2 v1.0.0
-opencode2             # starts the TUI (no env vars or flags needed)
-```
-
-### v2 vs v1 command names
-
-| | v1 | v2 |
-|---|---|---|
-| command | `opencode` | `opencode2` |
-| package | `opencode` | `opencode2` |
-| runtime | custom Bun 1.2.13 (patched, WebKit/JSC cross-compiled) | official Bun 1.4.2 android target |
-| TUI | OpenTUI (libopentui.so + libtagfix.so + libc++_shared.so) | OpenTUI 0.5.10 bionic (libopentui.so only) |
-
-## v2 build pipeline
-
-```
-scripts/
-  env-v2.sh                    # v2 environment (versions, NDK, zig, paths)
-  build-opentui-v2.sh          # Clone opentui v0.5.10, patch, build libopentui.so for bionic
-  build-opencode2-android.sh   # Build the opencode2 binary (bun v1.4.2, android target)
-  make-packages-v2.sh          # Create zip, pacman, and deb packages
-patches/opentui/
-  v2-0.5.10-android.patch      # OpenTUI android/bionic build fixes
-```
-
-```bash
-git clone https://github.com/guysoft/opencode-termux.git
-cd opencode-termux
-source scripts/env-v2.sh
-bash scripts/build-opentui-v2.sh
-bash scripts/build-opencode2-android.sh
-bash scripts/make-packages-v2.sh
-```
-
-Notes:
-- The opencode v2 source is expected in a worktree with the `v2-android` build target
-  (see the `v2-android` branch of `guysoft/opencode`); override with `OPENCODE_WORKTREE=`.
-- Requirements on the build host: Bun 1.4.2, Zig 0.16.0, Android NDK (r28), ~10 GB disk.
-- The binary disables the file watcher natively and has no native PTY binding; both
-  degrade gracefully (the wrapper sets
-  `OPENCODE_EXPERIMENTAL_DISABLE_FILEWATCHER=true` by default).
+See the [v1.0.1 release](https://github.com/guysoft/opencode-termux/releases/tag/v1.0.1) for
+the deb and standalone-zip alternatives.
 
 ## Install (Termux)
 
@@ -171,6 +100,7 @@ opencode-termux/
     webkit/android-support.patch   # 5 files, WebKit/JSC Android fixes
     zig/posix-android-sigaction.patch  # Zig stdlib sigaction/sigprocmask fix
     opentui/android-libc-link.patch  # Link NDK libc.so for Android dlopen
+    opentui/v2-0.5.10-android.patch  # (v2) OpenTUI android/bionic build fixes
   scripts/
     apply-patches.sh               # Clone upstream repos + apply patches
     build-icu.sh                   # Cross-compile ICU 75.1 for Android
@@ -181,6 +111,10 @@ opencode-termux/
     build-opencode.sh              # Build OpenCode standalone binary
     make-packages.sh               # Create zip, pacman, and deb packages
     build-opencode-android.ts      # TypeScript helper (module graph extraction)
+    env-v2.sh                      # (v2) Environment for the v2 pipeline
+    build-opentui-v2.sh            # (v2) Build libopentui.so for Android/bionic
+    build-opencode2-android.sh     # (v2) Build the opencode2 binary
+    make-packages-v2.sh            # (v2) Create opencode2 zip, pacman, and deb packages
   cmake/
     webkit-android-toolchain.cmake # WebKit CMake cross-compilation toolchain
   .github/workflows/
