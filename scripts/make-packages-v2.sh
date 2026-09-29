@@ -4,9 +4,9 @@
 # Usage: ./scripts/make-packages-v2.sh
 #
 # Creates three package formats:
-# 1. ZIP: opencode2-${OPENCODE_VERSION}-android-aarch64.zip (standalone binary)
-# 2. Pacman: opencode2-${OPENCODE_VERSION}-1-aarch64.pkg.tar.xz (Termux pacman format)
-# 3. Deb: opencode2_${OPENCODE_VERSION}_aarch64.deb (Termux deb format)
+# 1. ZIP: opencode2-${RELEASE_VERSION}-android-aarch64.zip (standalone binary)
+# 2. Pacman: opencode2-${RELEASE_VERSION}-1-aarch64.pkg.tar.xz (Termux pacman format)
+# 3. Deb: opencode2_${RELEASE_VERSION}_aarch64.deb (Termux deb format)
 #
 # Layouts (the wrapper supports both):
 #   zip:      opencode2, opencode2.bin, libopentui.so in one directory
@@ -30,7 +30,7 @@ mkdir -p "$OUT" "$DIST_DIR/flat"
 test -x "$BIN"
 test -f "$LIB"
 
-echo "=== Creating packages for opencode2 v${OPENCODE_VERSION} ==="
+echo "=== Creating packages for opencode2 v${RELEASE_VERSION} ==="
 
 # ==========================================
 # Wrapper (identical file ships in zip, pacman, deb)
@@ -94,7 +94,7 @@ chmod 755 "$DIST_DIR/flat/opencode2" "$DIST_DIR/flat/opencode2.bin"
 # 1. ZIP package
 # ==========================================
 echo ">>> Creating ZIP package..."
-ZIP="$OUT/opencode2-${OPENCODE_VERSION}-android-aarch64.zip"
+ZIP="$OUT/opencode2-${RELEASE_VERSION}-android-aarch64.zip"
 (cd "$DIST_DIR/flat" && zip -9 "$ZIP" opencode2 opencode2.bin libopentui.so >/dev/null)
 echo "    Created $ZIP"
 
@@ -112,7 +112,7 @@ chmod 755 "$STAGE/data/data/com.termux/files/usr/bin/opencode2"
 chmod 755 "$STAGE/data/data/com.termux/files/usr/libexec/opencode2/opencode2.bin"
 cat > "$STAGE/.PKGINFO" <<PEOF
 pkgname = opencode2
-pkgver = ${OPENCODE_VERSION}-1
+pkgver = ${RELEASE_VERSION}-1
 pkgdesc = OpenCode 2 AI coding assistant for Android/Termux
 url = https://github.com/guysoft/opencode-termux
 builddate = $(date +%s)
@@ -123,7 +123,7 @@ license = MIT
 depend = ripgrep
 PEOF
 
-PACMAN_NAME="opencode2-${OPENCODE_VERSION}-1-aarch64.pkg.tar.xz"
+PACMAN_NAME="opencode2-${RELEASE_VERSION}-1-aarch64.pkg.tar.xz"
 (cd "$STAGE" && tar cf - .PKGINFO data | xz -9 > "$OUT/$PACMAN_NAME")
 echo "    Created $PACMAN_NAME"
 
@@ -136,7 +136,7 @@ mkdir -p "$DEB_STAGE/data/data/data" "$DEB_STAGE/DEBIAN"
 cp -a "$STAGE/data/data/." "$DEB_STAGE/data/data/data/"
 cat > "$DEB_STAGE/DEBIAN/control" <<DEOF
 Package: opencode2
-Version: ${OPENCODE_VERSION}
+Version: ${RELEASE_VERSION}
 Architecture: aarch64
 Maintainer: Guy Sheffer <guysoft@gmail.com>
 Installed-Size: $(du -sk "$DEB_STAGE/data" | cut -f1)
@@ -151,15 +151,15 @@ DEOF
 printf '2.0\n' > "$DEB_STAGE/debian-binary"
 (cd "$DEB_STAGE/data" && tar czf "$DEB_STAGE/data.tar.gz" data)
 (cd "$DEB_STAGE/DEBIAN" && tar czf "$DEB_STAGE/control.tar.gz" control)
-(cd "$DEB_STAGE" && ar rc "$OUT/opencode2_${OPENCODE_VERSION}_aarch64.deb" debian-binary control.tar.gz data.tar.gz)
-DEB_NAME="opencode2_${OPENCODE_VERSION}_aarch64.deb"
+(cd "$DEB_STAGE" && ar rc "$OUT/opencode2_${RELEASE_VERSION}_aarch64.deb" debian-binary control.tar.gz data.tar.gz)
+DEB_NAME="opencode2_${RELEASE_VERSION}_aarch64.deb"
 echo "    Created $DEB_NAME"
 
 # ==========================================
 # Summary
 # ==========================================
 rm -rf "$STAGE" "$DEB_STAGE"
-(cd "$OUT" && sha256sum "$DEB_NAME" "$PACMAN_NAME" "opencode2-${OPENCODE_VERSION}-android-aarch64.zip" > SHA256SUMS)
+(cd "$OUT" && sha256sum "$DEB_NAME" "$PACMAN_NAME" "opencode2-${RELEASE_VERSION}-android-aarch64.zip" > SHA256SUMS)
 echo ""
 echo "=== Packages created ==="
 echo ""
@@ -168,4 +168,4 @@ echo ""
 echo "Install on Termux:"
 echo "  pacman -U $PACMAN_NAME"
 echo "  dpkg -i $DEB_NAME"
-echo "  unzip opencode2-${OPENCODE_VERSION}-android-aarch64.zip"
+echo "  unzip opencode2-${RELEASE_VERSION}-android-aarch64.zip"

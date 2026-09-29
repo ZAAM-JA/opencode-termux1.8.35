@@ -18,13 +18,17 @@ separate packages and commands, and v2 never overwrites v1 files.
 Install the v2 pre-release alongside v1:
 
 ```bash
-curl -LO https://github.com/guysoft/opencode-termux/releases/download/v1.0.1/opencode2-1.0.1-1-aarch64.pkg.tar.xz
-pacman -U opencode2-1.0.1-1-aarch64.pkg.tar.xz
+curl -LO https://github.com/guysoft/opencode-termux/releases/download/v1.0.2/opencode2-1.0.2-1-aarch64.pkg.tar.xz
+pacman -U opencode2-1.0.2-1-aarch64.pkg.tar.xz
 opencode2
 ```
 
-See the [v1.0.1 release](https://github.com/guysoft/opencode-termux/releases/tag/v1.0.1) for
+See the [v1.0.2 release](https://github.com/guysoft/opencode-termux/releases/tag/v1.0.2) for
 the deb and standalone-zip alternatives.
+
+> **Two version numbers.** `opencode2 --version` reports the *OpenCode 2 app* version
+> (e.g. `2.0.0-android-termux.1`). The `v1.0.x` numbers are **this repo's release/package**
+> tags, which track the Android build, not the app.
 
 ## Install (Termux)
 

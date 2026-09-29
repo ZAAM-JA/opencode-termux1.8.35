@@ -3,8 +3,15 @@ set -euo pipefail
 
 export REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 export WORK_DIR="${WORK_DIR:-${REPO_ROOT}/build-v2}"
-export OPENCODE_VERSION="${OPENCODE_VERSION:-1.0.1}"
+
+# App version baked into the binary (shown by "opencode2 --version").
+# This is the OpenCode 2 app line, independent of this repo release tags.
+export OPENCODE_VERSION="${OPENCODE_VERSION:-2.0.0-android-termux.1}"
 export OPENCODE_CHANNEL="${OPENCODE_CHANNEL:-android-termux}"
+
+# Release/package version for this repo downloads and tag names.
+export RELEASE_VERSION="${RELEASE_VERSION:-1.0.2}"
+
 export BUN_VERSION="${BUN_VERSION:-1.4.2}"
 export OPENTUI_VERSION="${OPENTUI_VERSION:-0.5.10}"
 export ANDROID_API="${ANDROID_API:-29}"
