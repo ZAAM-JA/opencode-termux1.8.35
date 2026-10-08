@@ -274,7 +274,18 @@ jobs:
         run: |
           source scripts/env.sh
           ./scripts/build-opencode.sh
+      - name: Verify OpenCode build output
+        run: |
+          echo "===== VERIFY SOURCE VERSION ====="
+          cd "$OPENCODE_SRC"
+          git describe --tags || true
 
+          echo "===== VERIFY BUILT BINARY ====="
+          ls -lh "$DIST_DIR" || true
+
+          if [ -f "$DIST_DIR/opencode" ]; then
+            "$DIST_DIR/opencode" --version || true
+          fi
       - name: Verify OpenCode binary
         run: |
           OPENCODE_BINARY="${WORK_DIR}/dist/opencode"
