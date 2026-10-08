@@ -39,7 +39,7 @@ export WORK_DIR="${WORK_DIR:-${REPO_ROOT}/build}"
 export BUN_SRC="${WORK_DIR}/bun-src"
 export WEBKIT_SRC="${WORK_DIR}/webkit-src"
 export OPENTUI_SRC="${WORK_DIR}/opentui-src"
-export OPENCODE_SRC="${WORK_DIR}/opencode-src"
+export OPENCODE_SRC="${WORK_DIR}/opencode-src-${OPENCODE_VERSION}"
 export ICU_SRC="${WORK_DIR}/icu-src"
 
 export DEPS_PREFIX="${WORK_DIR}/deps-android/prefix"

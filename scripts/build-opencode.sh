@@ -24,19 +24,18 @@ HOST_BUN="${HOST_BUN:-bun}"
 
 echo "=== Building OpenCode v${OPENCODE_VERSION} for Android aarch64 ==="
 
-# Clone OpenCode if needed
+# Clone OpenCode cleanly for the requested version
+if [ -d "$OPENCODE_SRC/.git" ]; then
+    echo ">>> Removing existing OpenCode source to guarantee clean version..."
+    rm -rf "$OPENCODE_SRC"
+fi
+
+echo ">>> Cloning OpenCode v${OPENCODE_VERSION}..."
+git clone --depth 1 --branch "v${OPENCODE_VERSION}" https://github.com/anomalyco/opencode.git "$OPENCODE_SRC"
+
 if [ ! -d "$OPENCODE_SRC/.git" ]; then
-    echo ">>> Cloning OpenCode..."
-    git clone --depth 1 --branch "v${OPENCODE_VERSION}" https://github.com/anomalyco/opencode.git "$OPENCODE_SRC"
-else
-    echo ">>> OpenCode source exists at $OPENCODE_SRC"
-    cd "$OPENCODE_SRC"
-    CURRENT=$(git describe --tags --exact-match 2>/dev/null || git rev-parse --short HEAD 2>/dev/null || echo "unknown")
-    if [ "$CURRENT" != "v${OPENCODE_VERSION}" ]; then
-        echo "    Checking out v${OPENCODE_VERSION} (was $CURRENT)..."
-        git fetch --tags origin "v${OPENCODE_VERSION}" 2>/dev/null || true
-        git checkout --force "v${OPENCODE_VERSION}"
-    fi
+    echo "ERROR: OpenCode clone failed"
+    exit 1
 fi
 
 OPENCODE_PKG="$OPENCODE_SRC/packages/opencode"
